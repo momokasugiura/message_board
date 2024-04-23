@@ -39,6 +39,20 @@ public class UpdateServlet extends HttpServlet {
             var currentTime = new Timestamp(System.currentTimeMillis());
             m.setUpdated_at(currentTime); // 更新日時のみ上書き
 
+         // バリデーションを実行してエラーがあったら編集画面のフォームに戻る
+            List<String> errors = MessageValidator.validate(m);
+            if(errors.size() > 0) {
+                em.close();
+
+                // フォームに初期値を設定、さらにエラーメッセージを送る
+                request.setAttribute("_token", request.getSession().getId());
+                request.setAttribute("message", m);
+                request.setAttribute("errors", errors);
+
+                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/messages/edit.jsp");
+                rd.forward(request, response);
+            } else {
+            
             // データベースを更新
             em.getTransaction().begin();
             em.getTransaction().commit();
@@ -51,6 +65,7 @@ public class UpdateServlet extends HttpServlet {
             // indexページへリダイレクト
             response.sendRedirect(request.getContextPath() + "/index");
         }
-    }
-
-}
+     }
+        
+ }
+    
